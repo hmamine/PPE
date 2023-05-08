@@ -1,0 +1,11 @@
+	prot_fam	ko_term	Descript	Down-Ea
+s001	genetic_information_processing	ko03400	DNA_repair_and_recombination_proteins	1
+s002	genetic_information_processing	ko03021	Transcription_machinery	1
+s003	genetic_information_processing	ko03009	Ribosome_biogenesis	1
+s004	genetic_information_processing	ko03000	Transcription_factors	1
+s005	metabolism	ko01000	Enzymes	16
+s006	metabolism	ko01003	Glycosyltransferases	1
+s007	metabolism	ko01002	Peptidases_and_inhibitors	1
+s008	signaling_cellular_processes	ko02035	Bacterial_motility_proteins	2
+s009	signaling_cellular_processes	ko02000	Transporters	2
+s010	not_determined	ND	ND	8
