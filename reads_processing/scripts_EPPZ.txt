@@ -1,0 +1,152 @@
+#!/bin/bash
+
+#script for pre-processing 16S (V4-515F-806R) amplicons sequencing using Qiime 2 2021.4
+#originally written by M. Amine Hassani - hassani.medamine@gmail.com - Jul2021
+#these scripts were run on local computer
+
+conda activate qiime2-2021.4
+#putting all fastq.gz in same file
+#mv Sample_*/*.fastq.gz .
+#rename "s/_[A,C,G,T]*-[A,C,G,T]*_L001//g" *.fastq.gz
+
+# loading the configuration file 
+#config_file=$1
+#source $config_file
+
+# clearing files
+#rm -fr "$path_to_data/output_*" "$path_to_data/mapping_files" "$path_to_data/export"
+
+	
+echo -e "\n 1-importing sequences..."
+
+	qiime tools import \
+		--type "SampleData[PairedEndSequencesWithQuality]" \
+		--input-format PairedEndFastqManifestPhred33V2 \
+		--input-path manifest_EPPZ.tsv \
+		--output-path demux_seqs.qza;
+
+
+	qiime demux summarize \
+		--i-data demux_seqs.qza \
+		--o-visualization demux_seqs.qzv;
+
+
+	cat *_R1_001.fastq.gz > sam1_16s_R1.fastq.gz;
+	cat *_R2_001.fastq.gz > sam1_16s_R2.fastq.gz;
+
+	mkdir -p figaro_output figaro_input
+
+	python /home/mahassani/Biotools/figaro/figaro/figaro.py \
+		-i /home/mahassani/Biodata/FSFME/raw_data/figaro_input \
+		-o /home/mahassani/Biodata/FSFME/figaro_output \
+		-f 68 -r 64 -a 250 -F zymo;
+
+	qiime dada2 denoise-paired \
+		--i-demultiplexed-seqs demux_seqs.qza \
+#		--p-trim-left-f 8 \
+#		--p-trim-left-r	8 \
+		--p-trunc-len-f 221 \
+		--p-trunc-len-r 181 \
+		--o-table table.qza \
+		--o-representative-sequences rep-seqs.qza \
+		--o-denoising-stats denoising-stats.qza;
+
+	qiime metadata tabulate \
+		--m-input-file denoising-stats.qza\
+		--o-visualization stats-dada2.qzv;
+
+
+	qiime phylogeny align-to-tree-mafft-fasttree \
+		--i-sequences rep-seqs.qza \
+		--o-alignment aligned-rep-seqs.qza \
+		--o-masked-alignment masked-aligned-rep-seqs.qza \
+		--o-tree unrooted-tree.qza \
+		--o-rooted-tree rooted-tree.qza;
+
+	qiime feature-classifier classify-sklearn \
+		--i-classifier /home/mahassani/Biotools/silva-138-99-515-806-nb-classifier.qza \
+		--i-reads rep-seqs.qza \
+		--o-classification taxonomy.qza;
+
+	qiime tools export \
+		--input-path table.qza \
+		--output-path export;
+
+	biom convert \
+		-i export/feature-table.biom \
+		-o export/otu_table.tsv \
+		--to-tsv;
+		sed -i '1d' export/otu_table.tsv;
+		sed -i 's/#OTU ID//' export/otu_table.tsv;
+
+
+	qiime tools export \
+		--input-path rep-seqs.qza \
+		--output-path export;
+	
+	qiime tools export \
+		--input-path rooted-tree.qza \
+		--output-path export;
+.
+	qiime tools export \
+		--input-path taxonomy.qza \
+		--output-path export;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
